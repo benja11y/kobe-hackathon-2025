@@ -15,16 +15,16 @@ refreshBtn.addEventListener('click', () => {
     loadCommunityData();
 });
 
-// W3C Working Groups and their GitHub repos
+// W3C Working Groups and their GitHub repos (verified existing repos)
 const w3cGroups = [
     { name: 'CSS WG', repo: 'w3c/csswg-drafts' },
     { name: 'HTML WG', repo: 'w3c/html' },
     { name: 'Accessibility', repo: 'w3c/aria' },
     { name: 'Web Apps', repo: 'w3c/webappsec' },
-    { name: 'Web Performance', repo: 'w3c/performance-timeline' },
     { name: 'Web Components', repo: 'w3c/webcomponents' },
-    { name: 'Internationalization', repo: 'w3c/i18n' },
-    { name: 'Privacy', repo: 'w3c/privacycg' }
+    { name: 'Service Workers', repo: 'w3c/ServiceWorker' },
+    { name: 'WebRTC', repo: 'w3c/webrtc-pc' },
+    { name: 'Web Performance', repo: 'w3c/performance-timeline' }
 ];
 
 // Helper to show error messages
