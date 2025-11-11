@@ -166,7 +166,8 @@ async function loadCommunityData() {
 
         const groupsData = await Promise.all(fetchPromises);
 
-
+        // Aggregate all contributors for diversity
+        const allContributors = groupsData.flatMap(g => g.contributors);
 
         // Process activity levels
         const activityData = groupsData.map(g => ({
