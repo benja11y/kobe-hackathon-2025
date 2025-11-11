@@ -38,7 +38,7 @@ function showError(sectionId, message) {
 
 // Load community data
 async function loadCommunityData() {
-    const cacheKey = 'w3cCommunityData';
+    const cacheKey = 'w3cCommunityDataV2'; // Updated to invalidate old cache
     const cachedData = sessionStorage.getItem(cacheKey);
 
     if (cachedData) {
