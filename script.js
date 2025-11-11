@@ -57,16 +57,51 @@ const staticData = {
 async function loadCommunityData() {
     try {
         // Try to fetch real data from GitHub API
-        const response = await fetch('https://api.github.com/repos/w3c/csswg-drafts/stats/contributors');
-        if (response.ok) {
-            const data = await response.json();
-            // Process real data (simplified)
-            console.log('Real GitHub data loaded:', data);
+        const contributorsResponse = await fetch('https://api.github.com/repos/w3c/csswg-drafts/contributors?per_page=10');
+        const issuesResponse = await fetch('https://api.github.com/repos/w3c/csswg-drafts/issues?state=open&per_page=5');
+
+        if (contributorsResponse.ok && issuesResponse.ok) {
+            const contributors = await contributorsResponse.json();
+            const issues = await issuesResponse.json();
+
+            // Process real data
+            console.log('Real GitHub data loaded:', contributors, issues);
+
+            // Process contributors for heatmap (simulate activity)
+            const heatmapData = contributors.slice(0, 49).map((contrib, index) => ({
+                day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
+                activity: contrib.contributions > 50 ? 'high' : contrib.contributions > 20 ? 'medium' : 'low'
+            }));
+
+            // Process for activity (mock working groups)
+            const activityData = [
+                { group: 'CSS WG', prs: contributors.reduce((sum, c) => sum + c.contributions, 0) / 10, issues: issues.length * 20 },
+                { group: 'HTML WG', prs: 32, issues: 85 },
+                { group: 'Accessibility', prs: 28, issues: 95 },
+                { group: 'Web Apps', prs: 38, issues: 110 }
+            ];
+
+            // Process issues for discussions
+            const discussionsData = issues.map(issue => ({
+                title: issue.title,
+                author: issue.user.login,
+                time: new Date(issue.created_at).toLocaleString(),
+                new: true
+            }));
+
+            // Use static for diversity
+            const diversityData = staticData.diversity;
+
+            // Populate with real data
+            populateHeatmap(heatmapData);
+            populateActivity(activityData);
+            populateDiscussions(discussionsData);
+            populateDiversity(diversityData);
         } else {
-            throw new Error('API limit or error');
+            throw new Error('API error');
         }
     } catch (error) {
-        console.log('Using static data due to API limits:', error);
+        console.log('Using static data due to API issues:', error);
         // Use static data
         populateHeatmap(staticData.heatmap);
         populateActivity(staticData.activity);
