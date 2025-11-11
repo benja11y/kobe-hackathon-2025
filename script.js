@@ -214,7 +214,7 @@ async function loadCommunityData() {
         }));
 
         // Process mailing list activity: recent posts from all groups
-        let allMailing = groupsData.flatMap(g => g.mailing).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+        let allMailing = groupsData.flatMap(g => g.mailing).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20);
 
         // Fallback mock data if no mailing data fetched
         if (allMailing.length === 0) {
@@ -383,6 +383,16 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 } else {
     themeToggle.textContent = 'Dark Mode';
 }
+
+// Mailing list toggle functionality
+const mailingToggle = document.getElementById('mailing-toggle');
+const mailingActivity = document.getElementById('mailing-activity');
+mailingToggle.addEventListener('click', () => {
+    const isExpanded = mailingToggle.getAttribute('aria-expanded') === 'true';
+    mailingToggle.setAttribute('aria-expanded', !isExpanded);
+    mailingToggle.textContent = isExpanded ? 'Show Mailing List Activity' : 'Hide Mailing List Activity';
+    mailingActivity.classList.toggle('hidden');
+});
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', loadCommunityData);

@@ -258,6 +258,27 @@ section {
     margin-bottom: 0.5rem;
 }
 
+/* Toggle Button */
+.toggle-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    transition: background 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: var(--secondary-color);
+}
+
+.hidden {
+    display: none;
+}
+
 /* Mailing List Activity */
 .mailing-list {
     margin: 1rem 0;
