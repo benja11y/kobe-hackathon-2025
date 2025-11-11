@@ -122,17 +122,32 @@ async function loadCommunityData() {
             const contributors = await contributorsRes.json();
             const issues = await issuesRes.json();
             let mailingItems = [];
+            let mailingCount = 0;
             try {
-                if (group.mailing !== 'public' && mailingRes && mailingRes.ok) {
-                    const rssText = await mailingRes.text();
-                    mailingItems = parseRSS(rssText, group.name);
-                } else if (group.mailing === 'public') {
-                    // Skip mailing for unmapped repos
-                } else {
-                    console.log(`Mailing RSS failed for ${group.name}: ${mailingRes ? mailingRes.status : 'No response'}`);
+                if (group.mailing !== 'public') {
+                    // Fetch atom for recent posts
+                    if (mailingRes && mailingRes.ok) {
+                        const rssText = await mailingRes.text();
+                        mailingItems = parseRSS(rssText, group.name);
+                    }
+                    // Fetch current month archive for count
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = now.toLocaleString('en-US', { month: 'short' });
+                    const monthStr = year + month;
+                    const archiveRes = await fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/${monthStr}/thread.html`);
+                    if (archiveRes.ok) {
+                        const htmlText = await archiveRes.text();
+                        const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+                        mailingCount = doc.querySelectorAll('li').length;
+                    } else {
+                        console.log(`Archive fetch failed for ${group.name}: ${archiveRes.status}`);
+                        mailingCount = mailingItems.length; // Fallback to atom count
+                    }
                 }
             } catch (e) {
                 console.log(`Error fetching mailing for ${group.name}:`, e);
+                mailingCount = mailingItems.length;
             }
 
             return {
@@ -141,7 +156,7 @@ async function loadCommunityData() {
                 issues,
                 mailing: mailingItems,
                 totalContributions: contributors.reduce((sum, c) => sum + c.contributions, 0),
-                mailingCount: mailingItems.length
+                mailingCount
             };
         });
 
