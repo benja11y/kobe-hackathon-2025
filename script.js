@@ -113,7 +113,7 @@ async function loadCommunityData() {
             const [contributorsRes, issuesRes, mailingRes] = await Promise.all([
                 fetch(`https://api.github.com/repos/${group.repo}/contributors?per_page=10`, { headers }),
                 fetch(`https://api.github.com/repos/${group.repo}/issues?state=open&per_page=5`, { headers }),
-                fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/feed.atom`)
+                group.mailing !== 'public' ? fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/feed.atom`) : Promise.resolve(null)
             ]);
 
             if (!contributorsRes.ok || !issuesRes.ok) {
@@ -124,11 +124,13 @@ async function loadCommunityData() {
             const issues = await issuesRes.json();
             let mailingItems = [];
             try {
-                if (mailingRes.ok) {
+                if (group.mailing !== 'public' && mailingRes && mailingRes.ok) {
                     const rssText = await mailingRes.text();
                     mailingItems = parseRSS(rssText, group.name);
+                } else if (group.mailing === 'public') {
+                    // Skip mailing for unmapped repos
                 } else {
-                    console.log(`Mailing RSS failed for ${group.name}: ${mailingRes.status}`);
+                    console.log(`Mailing RSS failed for ${group.name}: ${mailingRes ? mailingRes.status : 'No response'}`);
                 }
             } catch (e) {
                 console.log(`Error fetching mailing for ${group.name}:`, e);
