@@ -53,7 +53,6 @@ function parseRSS(atomText, groupName) {
     const parsedItems = [];
 
     entries.forEach((entry, index) => {
-        if (index >= 5) return; // Limit to 5 per group
         const title = entry.querySelector('title')?.textContent || 'No title';
         const link = entry.querySelector('link')?.getAttribute('href') || '';
         const published = entry.querySelector('published')?.textContent || entry.querySelector('updated')?.textContent || '';
