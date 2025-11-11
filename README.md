@@ -43,6 +43,8 @@ A real-time dashboard monitoring W3C community engagement, showcasing modern CSS
 1. Clone this repository
 2. Open `index.html` in a modern web browser
 3. (Optional) Enter a GitHub personal access token in the input field to avoid API rate limits
+   - Create a [personal access token (classic)](https://github.com/settings/tokens/new) with **no additional scopes** (public data access only)
+   - This increases API rate limit from 60 to 5000 requests per hour
 4. For GitHub Pages deployment, enable Pages in repository settings
 
 ## Browser Support
