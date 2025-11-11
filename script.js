@@ -34,11 +34,14 @@ async function fetchW3CGroups() {
     const res = await fetch('https://api.github.com/orgs/w3c/repos?sort=stars&direction=desc&per_page=8', { headers });
     if (!res.ok) throw new Error('Failed to fetch W3C repos');
     const repos = await res.json();
-    return repos.map(repo => ({
+    console.log('Fetched top W3C repos by stars:', repos.map(r => ({ name: r.name, stars: r.stargazers_count, full_name: r.full_name })));
+    const groups = repos.map(repo => ({
         name: repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Capitalize words
         repo: repo.full_name,
         mailing: mailingMap[repo.name] || 'public' // Default to 'public' if not mapped
     }));
+    console.log('Mapped W3C groups:', groups);
+    return groups;
 }
 
 // Helper to parse Atom feed
