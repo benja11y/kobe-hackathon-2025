@@ -15,102 +15,181 @@ refreshBtn.addEventListener('click', () => {
     loadCommunityData();
 });
 
-// Static community data (fallback for API limits)
-const staticData = {
-    heatmap: [
-        { day: 'Mon', activity: 'low' }, { day: 'Tue', activity: 'medium' }, { day: 'Wed', activity: 'high' },
-        { day: 'Thu', activity: 'low' }, { day: 'Fri', activity: 'medium' }, { day: 'Sat', activity: 'low' },
-        { day: 'Sun', activity: 'high' }, { day: 'Mon', activity: 'medium' }, { day: 'Tue', activity: 'low' },
-        { day: 'Wed', activity: 'high' }, { day: 'Thu', activity: 'medium' }, { day: 'Fri', activity: 'low' },
-        { day: 'Sat', activity: 'medium' }, { day: 'Sun', activity: 'high' }, { day: 'Mon', activity: 'low' },
-        { day: 'Tue', activity: 'medium' }, { day: 'Wed', activity: 'high' }, { day: 'Thu', activity: 'low' },
-        { day: 'Fri', activity: 'medium' }, { day: 'Sat', activity: 'high' }, { day: 'Sun', activity: 'low' },
-        { day: 'Mon', activity: 'high' }, { day: 'Tue', activity: 'medium' }, { day: 'Wed', activity: 'low' },
-        { day: 'Thu', activity: 'high' }, { day: 'Fri', activity: 'medium' }, { day: 'Sat', activity: 'low' },
-        { day: 'Sun', activity: 'medium' }, { day: 'Mon', activity: 'high' }, { day: 'Tue', activity: 'low' },
-        { day: 'Wed', activity: 'medium' }, { day: 'Thu', activity: 'high' }, { day: 'Fri', activity: 'low' },
-        { day: 'Sat', activity: 'medium' }, { day: 'Sun', activity: 'high' }, { day: 'Mon', activity: 'low' },
-        { day: 'Tue', activity: 'high' }, { day: 'Wed', activity: 'medium' }, { day: 'Thu', activity: 'low' },
-        { day: 'Fri', activity: 'high' }, { day: 'Sat', activity: 'medium' }, { day: 'Sun', activity: 'low' }
-    ],
-    activity: [
-        { group: 'CSS WG', prs: 45, issues: 120 },
-        { group: 'HTML WG', prs: 32, issues: 85 },
-        { group: 'Accessibility', prs: 28, issues: 95 },
-        { group: 'Web Apps', prs: 38, issues: 110 }
-    ],
-    discussions: [
-        { title: 'CSS Grid Level 2 Updates', author: 'css-wg', time: '2 hours ago', new: true },
-        { title: 'ARIA 1.3 Draft Review', author: 'aria-wg', time: '4 hours ago', new: true },
-        { title: 'Web Components Discussion', author: 'webcomponents', time: '6 hours ago', new: false },
-        { title: 'Performance API Improvements', author: 'webperf', time: '8 hours ago', new: false }
-    ],
-    diversity: [
-        { region: 'North America', percentage: 35 },
-        { region: 'Europe', percentage: 30 },
-        { region: 'Asia', percentage: 25 },
-        { region: 'Other', percentage: 10 }
-    ]
-};
+// W3C Working Groups and their GitHub repos
+const w3cGroups = [
+    { name: 'CSS WG', repo: 'w3c/csswg-drafts' },
+    { name: 'HTML WG', repo: 'w3c/html' },
+    { name: 'Accessibility', repo: 'w3c/aria' },
+    { name: 'Web Apps', repo: 'w3c/webappsec' },
+    { name: 'Web Performance', repo: 'w3c/performance-timeline' },
+    { name: 'Web Components', repo: 'w3c/webcomponents' },
+    { name: 'Internationalization', repo: 'w3c/i18n' },
+    { name: 'Privacy', repo: 'w3c/privacycg' }
+];
 
 // Load community data
 async function loadCommunityData() {
-    try {
-        // Try to fetch real data from GitHub API
-        const contributorsResponse = await fetch('https://api.github.com/repos/w3c/csswg-drafts/contributors?per_page=10');
-        const issuesResponse = await fetch('https://api.github.com/repos/w3c/csswg-drafts/issues?state=open&per_page=5');
+    const cacheKey = 'w3cCommunityData';
+    const cachedData = sessionStorage.getItem(cacheKey);
 
-        if (contributorsResponse.ok && issuesResponse.ok) {
-            const contributors = await contributorsResponse.json();
-            const issues = await issuesResponse.json();
-
-            // Process real data
-            console.log('Real GitHub data loaded:', contributors, issues);
-
-            // Process contributors for heatmap (simulate activity)
-            const heatmapData = contributors.slice(0, 49).map((contrib, index) => ({
-                day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
-                activity: contrib.contributions > 50 ? 'high' : contrib.contributions > 20 ? 'medium' : 'low'
-            }));
-
-            // Process for activity (mock working groups)
-            const activityData = [
-                { group: 'CSS WG', prs: contributors.reduce((sum, c) => sum + c.contributions, 0) / 10, issues: issues.length * 20 },
-                { group: 'HTML WG', prs: 32, issues: 85 },
-                { group: 'Accessibility', prs: 28, issues: 95 },
-                { group: 'Web Apps', prs: 38, issues: 110 }
-            ];
-
-            // Process issues for discussions
-            const discussionsData = issues.map(issue => ({
-                title: issue.title,
-                author: issue.user.login,
-                time: new Date(issue.created_at).toLocaleString(),
-                new: true
-            }));
-
-            // Use static for diversity
-            const diversityData = staticData.diversity;
-
-            // Populate with real data
-            populateHeatmap(heatmapData);
-            populateActivity(activityData);
-            populateDiscussions(discussionsData);
-            populateDiversity(diversityData);
-        } else {
-            throw new Error('API error');
-        }
-    } catch (error) {
-        console.log('Using static data due to API issues:', error);
-        // Use static data
-        populateHeatmap(staticData.heatmap);
-        populateActivity(staticData.activity);
-        populateDiscussions(staticData.discussions);
-        populateDiversity(staticData.diversity);
+    if (cachedData) {
+        console.log('Loading cached W3C data');
+        const data = JSON.parse(cachedData);
+        populateHeatmap(data.heatmap);
+        populateActivity(data.activity);
+        populateDiscussions(data.discussions);
+        populateDiversity(data.diversity);
+        document.getElementById('heatmap-time').textContent = data.timestamp;
+        return;
     }
 
-    // Update timestamp
-    document.getElementById('heatmap-time').textContent = new Date().toLocaleString();
+    try {
+        console.log('Fetching fresh W3C data...');
+
+        // Fetch data for all groups in parallel
+        const fetchPromises = w3cGroups.map(async (group) => {
+            const [contributorsRes, issuesRes] = await Promise.all([
+                fetch(`https://api.github.com/repos/${group.repo}/contributors?per_page=10`),
+                fetch(`https://api.github.com/repos/${group.repo}/issues?state=open&per_page=5`)
+            ]);
+
+            if (!contributorsRes.ok || !issuesRes.ok) {
+                throw new Error(`Failed to fetch data for ${group.name}`);
+            }
+
+            const contributors = await contributorsRes.json();
+            const issues = await issuesRes.json();
+
+            return {
+                group: group.name,
+                contributors,
+                issues,
+                totalContributions: contributors.reduce((sum, c) => sum + c.contributions, 0)
+            };
+        });
+
+        const groupsData = await Promise.all(fetchPromises);
+
+        // Process heatmap: aggregate top contributors, simulate weekly activity
+        const allContributors = groupsData.flatMap(g => g.contributors);
+        const uniqueContributors = Array.from(
+            allContributors.reduce((map, c) => {
+                if (!map.has(c.login)) map.set(c.login, { ...c, total: c.contributions });
+                else map.get(c.login).total += c.contributions;
+                return map;
+            }, new Map()).values()
+        ).sort((a, b) => b.total - a.total).slice(0, 49);
+
+        const heatmapData = uniqueContributors.map((contrib, index) => ({
+            day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
+            activity: contrib.total > 100 ? 'high' : contrib.total > 50 ? 'medium' : 'low'
+        }));
+
+        // Process activity levels
+        const activityData = groupsData.map(g => ({
+            group: g.group,
+            prs: Math.round(g.totalContributions / 10), // Estimate PRs from contributions
+            issues: g.issues.length
+        }));
+
+        // Process discussions: recent issues from all groups
+        const allIssues = groupsData.flatMap(g => g.issues.map(issue => ({
+            ...issue,
+            group: g.group
+        }))).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 8);
+
+        const discussionsData = allIssues.map(issue => ({
+            title: `${issue.title} (${issue.group})`,
+            author: issue.user.login,
+            time: new Date(issue.created_at).toLocaleString(),
+            new: Date.now() - new Date(issue.created_at) < 24 * 60 * 60 * 1000 // New if < 24h
+        }));
+
+        // Process diversity: count contributor locations
+        const locations = {};
+        allContributors.forEach(c => {
+            if (c.location) {
+                const region = getRegionFromLocation(c.location);
+                locations[region] = (locations[region] || 0) + 1;
+            }
+        });
+
+        const totalWithLocation = Object.values(locations).reduce((sum, count) => sum + count, 0);
+        const diversityData = Object.entries(locations).map(([region, count]) => ({
+            region,
+            percentage: Math.round((count / totalWithLocation) * 100)
+        })).sort((a, b) => b.percentage - a.percentage);
+
+        // If no location data, use fallback
+        if (diversityData.length === 0) {
+            diversityData.push(
+                { region: 'North America', percentage: 35 },
+                { region: 'Europe', percentage: 30 },
+                { region: 'Asia', percentage: 25 },
+                { region: 'Other', percentage: 10 }
+            );
+        }
+
+        const processedData = {
+            heatmap: heatmapData,
+            activity: activityData,
+            discussions: discussionsData,
+            diversity: diversityData,
+            timestamp: new Date().toLocaleString()
+        };
+
+        // Cache in sessionStorage
+        sessionStorage.setItem(cacheKey, JSON.stringify(processedData));
+
+        // Populate
+        populateHeatmap(heatmapData);
+        populateActivity(activityData);
+        populateDiscussions(discussionsData);
+        populateDiversity(diversityData);
+        document.getElementById('heatmap-time').textContent = processedData.timestamp;
+
+    } catch (error) {
+        console.log('Error fetching W3C data, using fallback:', error);
+        // Fallback static data
+        const fallbackData = {
+            heatmap: Array.from({ length: 49 }, (_, i) => ({
+                day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i % 7],
+                activity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)]
+            })),
+            activity: w3cGroups.map(g => ({
+                group: g.name,
+                prs: Math.floor(Math.random() * 50) + 10,
+                issues: Math.floor(Math.random() * 100) + 20
+            })),
+            discussions: [
+                { title: 'Sample Discussion 1', author: 'user1', time: '1 hour ago', new: true },
+                { title: 'Sample Discussion 2', author: 'user2', time: '2 hours ago', new: false }
+            ],
+            diversity: [
+                { region: 'North America', percentage: 35 },
+                { region: 'Europe', percentage: 30 },
+                { region: 'Asia', percentage: 25 },
+                { region: 'Other', percentage: 10 }
+            ],
+            timestamp: new Date().toLocaleString()
+        };
+
+        sessionStorage.setItem(cacheKey, JSON.stringify(fallbackData));
+        populateHeatmap(fallbackData.heatmap);
+        populateActivity(fallbackData.activity);
+        populateDiscussions(fallbackData.discussions);
+        populateDiversity(fallbackData.diversity);
+        document.getElementById('heatmap-time').textContent = fallbackData.timestamp;
+    }
+}
+
+// Helper to determine region from location
+function getRegionFromLocation(location) {
+    const loc = location.toLowerCase();
+    if (loc.includes('usa') || loc.includes('canada') || loc.includes('mexico')) return 'North America';
+    if (loc.includes('uk') || loc.includes('germany') || loc.includes('france') || loc.includes('europe')) return 'Europe';
+    if (loc.includes('china') || loc.includes('japan') || loc.includes('india') || loc.includes('asia')) return 'Asia';
+    return 'Other';
 }
 
 // Populate heatmap

@@ -28,6 +28,15 @@
 - **Tech:** HTML, CSS, JS, GitHub API, modern CSS Grid/Flexbox/Animations
 - **Feasibility:** Medium - API rate limits may be challenging
 
+### Inspiration from w3c/cg-monitor
+- **Multi-source data collection**: W3C API, GitHub API, mailing lists, RSS feeds, wikis for comprehensive activity tracking
+- **Data storage**: One JSON file per group, processed into report.json for dashboard
+- **Activity visualization**: Generates charts, focuses on activity levels and transitions
+- **Automation**: Node.js scripts for data collection and processing
+- **Dashboard**: Static HTML/JS displaying processed data with interactive elements
+
+Adapted for our project: Fetch W3C WG data via GitHub API, store in sessionStorage, process for CSS-powered visualizations, ensure WCAG 3 compliance.
+
 ### Why This Option?
 1. **Directly relevant to W3C** - monitors community engagement in real-time
 2. **Modern CSS showcase** - uses cutting-edge CSS for data visualization
