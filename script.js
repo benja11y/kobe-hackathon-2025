@@ -27,15 +27,15 @@ const mailingMap = {
     'performance-timeline': 'public-web-perf'
 };
 
-// Fetch top W3C repos dynamically
+// Fetch top W3C repos dynamically by activity (open issues/PRs)
 async function fetchW3CGroups() {
     const token = document.getElementById('github-token').value;
     const headers = token ? { 'Authorization': `token ${token}` } : {};
     const res = await fetch('https://api.github.com/orgs/w3c/repos?per_page=50', { headers });
     if (!res.ok) throw new Error('Failed to fetch W3C repos');
     const allRepos = await res.json();
-    const repos = allRepos.sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 8);
-    console.log('Fetched and sorted top W3C repos by stars:', repos.map(r => ({ name: r.name, stars: r.stargazers_count, full_name: r.full_name })));
+    const repos = allRepos.sort((a, b) => b.open_issues_count - a.open_issues_count).slice(0, 8);
+    console.log('Fetched and sorted top W3C repos by open issues/PRs:', repos.map(r => ({ name: r.name, issues: r.open_issues_count, full_name: r.full_name })));
     const groups = repos.map(repo => ({
         name: repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Capitalize words
         repo: repo.full_name,
