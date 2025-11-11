@@ -28,8 +28,6 @@
 - **Tech:** HTML, CSS, JS, GitHub API, modern CSS Grid/Flexbox/Animations
 - **Feasibility:** Medium - API rate limits may be challenging
 
-## Recommended Approach: Option 3 - W3C Community Activity Monitor with CSS Magic & WCAG 3
-
 ### Why This Option?
 1. **Directly relevant to W3C** - monitors community engagement in real-time
 2. **Modern CSS showcase** - uses cutting-edge CSS for data visualization
