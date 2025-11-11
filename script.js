@@ -31,10 +31,11 @@ const mailingMap = {
 async function fetchW3CGroups() {
     const token = document.getElementById('github-token').value;
     const headers = token ? { 'Authorization': `token ${token}` } : {};
-    const res = await fetch('https://api.github.com/orgs/w3c/repos?sort=stars&direction=desc&per_page=8', { headers });
+    const res = await fetch('https://api.github.com/orgs/w3c/repos?per_page=50', { headers });
     if (!res.ok) throw new Error('Failed to fetch W3C repos');
-    const repos = await res.json();
-    console.log('Fetched top W3C repos by stars:', repos.map(r => ({ name: r.name, stars: r.stargazers_count, full_name: r.full_name })));
+    const allRepos = await res.json();
+    const repos = allRepos.sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 8);
+    console.log('Fetched and sorted top W3C repos by stars:', repos.map(r => ({ name: r.name, stars: r.stargazers_count, full_name: r.full_name })));
     const groups = repos.map(repo => ({
         name: repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Capitalize words
         repo: repo.full_name,
