@@ -130,18 +130,24 @@ async function loadCommunityData() {
                         const rssText = await mailingRes.text();
                         mailingItems = parseRSS(rssText, group.name);
                     }
-                    // Fetch current month archive for count
+                    // Fetch main archive page for current month message count
                     const now = new Date();
                     const year = now.getFullYear();
-                    const month = now.toLocaleString('en-US', { month: 'short' });
-                    const monthStr = year + month;
-                    const archiveRes = await fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/${monthStr}/thread.html`);
+                    const monthName = now.toLocaleString('en-US', { month: 'long' });
+                    const archiveRes = await fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/`);
                     if (archiveRes.ok) {
                         const htmlText = await archiveRes.text();
                         const doc = new DOMParser().parseFromString(htmlText, 'text/html');
-                        mailingCount = doc.querySelectorAll('li').length;
+                        const text = doc.body.textContent;
+                        const pattern = new RegExp(`${monthName} ${year}: (\\d+) messages`);
+                        const match = text.match(pattern);
+                        if (match) {
+                            mailingCount = parseInt(match[1]);
+                        } else {
+                            mailingCount = mailingItems.length; // Fallback
+                        }
                     } else {
-                        console.log(`Archive fetch failed for ${group.name}: ${archiveRes.status}`);
+                        console.log(`Archive page fetch failed for ${group.name}: ${archiveRes.status}`);
                         mailingCount = mailingItems.length; // Fallback to atom count
                     }
                 }
