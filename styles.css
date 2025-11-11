@@ -191,6 +191,12 @@ section {
     text-align: right;
 }
 
+/* Hide mailing activity when toggled */
+#activity-section.hide-mailing .mailing-fill,
+#activity-section.hide-mailing .activity-value:last-child {
+    display: none;
+}
+
 /* Discussions Feed - CSS Transitions */
 .discussions-list {
     margin: 1rem 0;

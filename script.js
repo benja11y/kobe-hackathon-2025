@@ -361,6 +361,16 @@ mailingToggle.addEventListener('click', () => {
     mailingActivity.classList.toggle('hidden');
 });
 
+// Activity levels toggle functionality
+const activityToggle = document.getElementById('activity-toggle');
+const activitySection = document.getElementById('activity-section');
+activityToggle.addEventListener('click', () => {
+    const isExpanded = activityToggle.getAttribute('aria-expanded') === 'true';
+    activityToggle.setAttribute('aria-expanded', !isExpanded);
+    activityToggle.textContent = isExpanded ? 'Show Mailing Activity' : 'Hide Mailing Activity';
+    activitySection.classList.toggle('hide-mailing');
+});
+
 // Load data on page load
 document.addEventListener('DOMContentLoaded', loadCommunityData);
 

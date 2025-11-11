@@ -25,8 +25,11 @@
             <p>Last updated: <time id="heatmap-time">Loading...</time></p>
         </section>
     -->
-        <section id="activity-section" aria-labelledby="activity-heading">
+        <section id="activity-section" aria-labelledby="activity-heading" class="hide-mailing">
             <h2 id="activity-heading">Working Group Activity Levels</h2>
+            <button id="activity-toggle" class="toggle-btn" aria-expanded="false" aria-controls="activity-chart">
+                Show Mailing Activity
+            </button>
             <div id="activity-chart" class="activity-flex" role="region" aria-label="Activity levels chart using CSS Flexbox"></div>
         </section>
 
