@@ -15,17 +15,31 @@ refreshBtn.addEventListener('click', () => {
     loadCommunityData();
 });
 
-// W3C Working Groups and their GitHub repos and mailing lists (verified existing)
-const w3cGroups = [
-    { name: 'CSS WG', repo: 'w3c/csswg-drafts', mailing: 'www-style' },
-    { name: 'HTML WG', repo: 'w3c/html', mailing: 'public-html' },
-    { name: 'Accessibility', repo: 'w3c/aria', mailing: 'wai-xtech' },
-    { name: 'Web Apps', repo: 'w3c/webappsec', mailing: 'public-webappsec' },
-    { name: 'Web Components', repo: 'w3c/webcomponents', mailing: 'public-webapps' },
-    { name: 'Service Workers', repo: 'w3c/ServiceWorker', mailing: 'public-webapps' },
-    { name: 'WebRTC', repo: 'w3c/webrtc-pc', mailing: 'public-webrtc' },
-    { name: 'Web Performance', repo: 'w3c/performance-timeline', mailing: 'public-web-perf' }
-];
+// Mailing list mapping for known repos
+const mailingMap = {
+    'csswg-drafts': 'www-style',
+    'html': 'public-html',
+    'aria': 'wai-xtech',
+    'webappsec': 'public-webappsec',
+    'webcomponents': 'public-webapps',
+    'ServiceWorker': 'public-webapps',
+    'webrtc-pc': 'public-webrtc',
+    'performance-timeline': 'public-web-perf'
+};
+
+// Fetch top W3C repos dynamically
+async function fetchW3CGroups() {
+    const token = document.getElementById('github-token').value;
+    const headers = token ? { 'Authorization': `token ${token}` } : {};
+    const res = await fetch('https://api.github.com/orgs/w3c/repos?sort=stars&direction=desc&per_page=8', { headers });
+    if (!res.ok) throw new Error('Failed to fetch W3C repos');
+    const repos = await res.json();
+    return repos.map(repo => ({
+        name: repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Capitalize words
+        repo: repo.full_name,
+        mailing: mailingMap[repo.name] || 'public' // Default to 'public' if not mapped
+    }));
+}
 
 // Helper to parse Atom feed
 function parseRSS(atomText, groupName) {
@@ -81,6 +95,9 @@ async function loadCommunityData() {
 
     try {
         console.log('Fetching fresh W3C data...');
+
+        // Fetch dynamic W3C groups
+        const w3cGroups = await fetchW3CGroups();
 
         // Get GitHub token if provided (for higher rate limits)
         // Note: Token is entered locally and not committed to repo
