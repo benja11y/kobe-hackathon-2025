@@ -55,11 +55,16 @@ async function loadCommunityData() {
     try {
         console.log('Fetching fresh W3C data...');
 
+        // Get GitHub token if provided (for higher rate limits)
+        // Note: Token is entered locally and not committed to repo
+        const token = document.getElementById('github-token').value;
+        const headers = token ? { 'Authorization': `token ${token}` } : {};
+
         // Fetch data for all groups in parallel
         const fetchPromises = w3cGroups.map(async (group) => {
             const [contributorsRes, issuesRes] = await Promise.all([
-                fetch(`https://api.github.com/repos/${group.repo}/contributors?per_page=10`),
-                fetch(`https://api.github.com/repos/${group.repo}/issues?state=open&per_page=5`)
+                fetch(`https://api.github.com/repos/${group.repo}/contributors?per_page=10`, { headers }),
+                fetch(`https://api.github.com/repos/${group.repo}/issues?state=open&per_page=5`, { headers })
             ]);
 
             if (!contributorsRes.ok || !issuesRes.ok) {

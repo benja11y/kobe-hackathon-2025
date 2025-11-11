@@ -42,7 +42,8 @@ A real-time dashboard monitoring W3C community engagement, showcasing modern CSS
 
 1. Clone this repository
 2. Open `index.html` in a modern web browser
-3. For GitHub Pages deployment, enable Pages in repository settings
+3. (Optional) Enter a GitHub personal access token in the input field to avoid API rate limits
+4. For GitHub Pages deployment, enable Pages in repository settings
 
 ## Browser Support
 
