@@ -1,14 +1,3 @@
-// Theme toggle functionality
-const themeToggle = document.getElementById('theme-toggle');
-const body = document.body;
-
-themeToggle.addEventListener('click', () => {
-    const currentTheme = body.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    body.setAttribute('data-theme', newTheme);
-    themeToggle.textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
-});
-
 // Refresh data functionality
 const refreshBtn = document.getElementById('refresh-data');
 refreshBtn.addEventListener('click', () => {
@@ -361,13 +350,7 @@ function populateMailing(data) {
     });
 }
 
-// Initialize theme
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    body.setAttribute('data-theme', 'dark');
-    themeToggle.textContent = 'Light Mode';
-} else {
-    themeToggle.textContent = 'Dark Mode';
-}
+
 
 // Mailing list toggle functionality
 const mailingToggle = document.getElementById('mailing-toggle');
