@@ -27,22 +27,39 @@ const mailingMap = {
     'performance-timeline': 'public-web-perf'
 };
 
+// Fallback hardcoded groups for demo when API fails
+const fallbackGroups = [
+    { name: 'CSS WG', repo: 'w3c/csswg-drafts', mailing: 'www-style' },
+    { name: 'HTML WG', repo: 'w3c/html', mailing: 'public-html' },
+    { name: 'Accessibility', repo: 'w3c/aria', mailing: 'wai-xtech' },
+    { name: 'Web Apps', repo: 'w3c/webappsec', mailing: 'public-webappsec' },
+    { name: 'Web Components', repo: 'w3c/webcomponents', mailing: 'public-webapps' },
+    { name: 'Service Workers', repo: 'w3c/ServiceWorker', mailing: 'public-webapps' },
+    { name: 'WebRTC', repo: 'w3c/webrtc-pc', mailing: 'public-webrtc' },
+    { name: 'Web Performance', repo: 'w3c/performance-timeline', mailing: 'public-web-perf' }
+];
+
 // Fetch top W3C repos dynamically by activity (open issues/PRs)
 async function fetchW3CGroups() {
     const token = document.getElementById('github-token').value;
     const headers = token ? { 'Authorization': `token ${token}` } : {};
-    const res = await fetch('https://api.github.com/orgs/w3c/repos?per_page=50', { headers });
-    if (!res.ok) throw new Error('Failed to fetch W3C repos');
-    const allRepos = await res.json();
-    const repos = allRepos.sort((a, b) => b.open_issues_count - a.open_issues_count).slice(0, 8);
-    console.log('Fetched and sorted top W3C repos by open issues/PRs:', repos.map(r => ({ name: r.name, issues: r.open_issues_count, full_name: r.full_name })));
-    const groups = repos.map(repo => ({
-        name: repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Capitalize words
-        repo: repo.full_name,
-        mailing: mailingMap[repo.name] || 'public' // Default to 'public' if not mapped
-    }));
-    console.log('Mapped W3C groups:', groups);
-    return groups;
+    try {
+        const res = await fetch('https://api.github.com/orgs/w3c/repos?per_page=50', { headers });
+        if (!res.ok) throw new Error('Failed to fetch W3C repos');
+        const allRepos = await res.json();
+        const repos = allRepos.sort((a, b) => b.open_issues_count - a.open_issues_count).slice(0, 8);
+        console.log('Fetched and sorted top W3C repos by open issues/PRs:', repos.map(r => ({ name: r.name, issues: r.open_issues_count, full_name: r.full_name })));
+        const groups = repos.map(repo => ({
+            name: repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Capitalize words
+            repo: repo.full_name,
+            mailing: mailingMap[repo.name] || 'public' // Default to 'public' if not mapped
+        }));
+        console.log('Mapped W3C groups:', groups);
+        return groups;
+    } catch (e) {
+        console.log('API failed, using fallback groups:', e);
+        return fallbackGroups;
+    }
 }
 
 // Helper to parse Atom feed
