@@ -3,71 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS Magic & WCAG 3 Dashboard</title>
+    <title>W3C Community Activity Monitor</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>CSS Magic Showcase with WCAG 3 Compliance</h1>
+        <h1>W3C Community Activity Monitor</h1>
         <nav>
             <button id="theme-toggle" aria-label="Toggle dark mode">Toggle Theme</button>
+            <button id="refresh-data" aria-label="Refresh community data">Refresh Data</button>
         </nav>
     </header>
 
     <main>
-        <section id="grid-section" aria-labelledby="grid-heading">
-            <h2 id="grid-heading">CSS Grid Layout</h2>
-            <div class="grid-container" role="region" aria-label="Grid layout example">
-                <div class="grid-item">Header</div>
-                <div class="grid-item">Sidebar</div>
-                <div class="grid-item">Main Content</div>
-                <div class="grid-item">Footer</div>
-            </div>
-            <details>
-                <summary>WCAG 3 Compliance Notes</summary>
-                <p>Ensures logical content flow and keyboard navigation. Grid areas provide semantic structure for assistive technologies.</p>
-            </details>
+        <section id="heatmap-section" aria-labelledby="heatmap-heading">
+            <h2 id="heatmap-heading">Active Contributors Heatmap</h2>
+            <div id="heatmap" class="heatmap-grid" role="img" aria-label="Contributors activity heatmap using CSS Grid"></div>
+            <p>Last updated: <time id="heatmap-time">Loading...</time></p>
         </section>
 
-        <section id="flexbox-section" aria-labelledby="flex-heading">
-            <h2 id="flex-heading">CSS Flexbox</h2>
-            <div class="flex-container" role="region" aria-label="Flexbox layout example">
-                <div class="flex-item">Item 1</div>
-                <div class="flex-item">Item 2</div>
-                <div class="flex-item">Item 3</div>
-            </div>
-            <details>
-                <summary>WCAG 3 Compliance Notes</summary>
-                <p>Flexible layouts adapt to different screen sizes and user preferences, supporting responsive design principles.</p>
-            </details>
+        <section id="activity-section" aria-labelledby="activity-heading">
+            <h2 id="activity-heading">Working Group Activity Levels</h2>
+            <div id="activity-chart" class="activity-flex" role="region" aria-label="Activity levels chart using CSS Flexbox"></div>
         </section>
 
-        <section id="animations-section" aria-labelledby="anim-heading">
-            <h2 id="anim-heading">CSS Animations</h2>
-            <button id="animate-btn" aria-describedby="anim-desc">Animate Me</button>
-            <div id="animated-box" role="img" aria-label="Animated box example"></div>
-            <p id="anim-desc">Click to see smooth CSS animations in action.</p>
-            <details>
-                <summary>WCAG 3 Compliance Notes</summary>
-                <p>Animations respect user motion preferences. Use prefers-reduced-motion media query for accessibility.</p>
-            </details>
+        <section id="discussions-section" aria-labelledby="discussions-heading">
+            <h2 id="discussions-heading">Recent Discussions & Topics</h2>
+            <div id="discussions-feed" class="discussions-list" role="feed" aria-label="Recent discussions feed"></div>
         </section>
 
-        <section id="custom-properties-section" aria-labelledby="custom-heading">
-            <h2 id="custom-heading">CSS Custom Properties</h2>
-            <div class="color-demo">
-                <input type="color" id="color-picker" aria-label="Choose theme color">
-                <div class="demo-box" style="--theme-color: #007acc;">Themed Box</div>
-            </div>
-            <details>
-                <summary>WCAG 3 Compliance Notes</summary>
-                <p>Allows dynamic theming while maintaining contrast ratios and accessibility standards.</p>
-            </details>
+        <section id="diversity-section" aria-labelledby="diversity-heading">
+            <h2 id="diversity-heading">Contributor Diversity Metrics</h2>
+            <div id="diversity-metrics" class="diversity-animated" role="region" aria-label="Diversity metrics with CSS animations"></div>
         </section>
     </main>
 
     <footer>
-        <p>Built for W3C TPAC 2025 Hackathon | <a href="https://github.com/yourusername/css-wcag3-dashboard">View Source</a></p>
+        <p>Built for W3C TPAC 2025 Hackathon | Showcasing CSS Magic with WCAG 3 Compliance | <a href="https://github.com/yourusername/w3c-community-monitor">View Source</a></p>
     </footer>
 
     <script src="script.js"></script>

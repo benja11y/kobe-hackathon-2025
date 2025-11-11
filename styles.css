@@ -1,4 +1,4 @@
-/* CSS Custom Properties for theming */
+/* CSS Custom Properties for theming and data visualization */
 :root {
     --primary-color: #007acc;
     --secondary-color: #f0f0f0;
@@ -6,6 +6,13 @@
     --bg-color: #fff;
     --border-radius: 8px;
     --transition: all 0.3s ease;
+    --activity-low: #e3f2fd;
+    --activity-medium: #2196f3;
+    --activity-high: #0d47a1;
+    --diversity-color-1: #ff6b6b;
+    --diversity-color-2: #4ecdc4;
+    --diversity-color-3: #45b7d1;
+    --diversity-color-4: #f9ca24;
 }
 
 [data-theme="dark"] {
@@ -13,6 +20,9 @@
     --secondary-color: #333;
     --text-color: #f0f0f0;
     --bg-color: #1a1a1a;
+    --activity-low: #1a237e;
+    --activity-medium: #64b5f6;
+    --activity-high: #bbdefb;
 }
 
 /* Base styles */
@@ -37,6 +47,12 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+nav {
+    display: flex;
+    gap: 1rem;
 }
 
 nav button {
@@ -64,108 +80,185 @@ section {
     padding: 1.5rem;
     border: 1px solid var(--secondary-color);
     border-radius: var(--border-radius);
+    background: var(--bg-color);
 }
 
-/* CSS Grid Example */
-.grid-container {
+/* Contributors Heatmap - CSS Grid Magic */
+.heatmap-grid {
     display: grid;
-    grid-template-areas:
-        "header header"
-        "sidebar main"
-        "footer footer";
-    gap: 1rem;
-    height: 300px;
-    margin: 1rem 0;
-    background: var(--secondary-color);
-    padding: 1rem;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 2px;
+    width: 100%;
+    max-width: 400px;
+    margin: 1rem auto;
     border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
-.grid-item:nth-child(1) { grid-area: header; background: var(--primary-color); color: white; }
-.grid-item:nth-child(2) { grid-area: sidebar; background: #ff6b6b; }
-.grid-item:nth-child(3) { grid-area: main; background: #4ecdc4; }
-.grid-item:nth-child(4) { grid-area: footer; background: #45b7d1; }
+.heatmap-cell {
+    aspect-ratio: 1;
+    background: var(--activity-low);
+    border-radius: 2px;
+    transition: var(--transition);
+    position: relative;
+}
 
-.grid-item {
-    padding: 1rem;
+.heatmap-cell[data-activity="medium"] {
+    background: var(--activity-medium);
+}
+
+.heatmap-cell[data-activity="high"] {
+    background: var(--activity-high);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.heatmap-cell:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--secondary-color);
+    color: var(--text-color);
+    padding: 0.5rem;
     border-radius: var(--border-radius);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+/* Activity Levels - CSS Flexbox Charts */
+.activity-flex {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.activity-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 1rem;
+}
+
+.activity-label {
+    min-width: 150px;
     font-weight: bold;
 }
 
-/* CSS Flexbox Example */
-.flex-container {
-    display: flex;
-    gap: 1rem;
-    margin: 1rem 0;
-    padding: 1rem;
+.activity-fill {
+    flex: 1;
+    height: 20px;
     background: var(--secondary-color);
     border-radius: var(--border-radius);
-    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
 }
 
-.flex-item {
-    flex: 1;
-    min-width: 150px;
-    padding: 1rem;
+.activity-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
     background: var(--primary-color);
-    color: white;
     border-radius: var(--border-radius);
-    text-align: center;
+    width: var(--percentage, 0%);
+    transition: width 1s ease;
 }
 
-/* CSS Animations Example */
-#animated-box {
-    width: 100px;
-    height: 100px;
-    background: var(--primary-color);
+.activity-value {
+    min-width: 50px;
+    text-align: right;
+}
+
+/* Discussions Feed - CSS Transitions */
+.discussions-list {
     margin: 1rem 0;
+}
+
+.discussion-item {
+    padding: 1rem;
+    border: 1px solid var(--secondary-color);
     border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
     transition: var(--transition);
-}
-
-#animated-box.animated {
-    transform: rotate(360deg) scale(1.2);
-    background: #ff6b6b;
-}
-
-#animate-btn {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
     cursor: pointer;
-    margin-bottom: 1rem;
 }
 
-/* CSS Custom Properties Demo */
-.color-demo {
-    margin: 1rem 0;
+.discussion-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.discussion-item.new {
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-100%); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Diversity Metrics - CSS Animations */
+.diversity-animated {
     display: flex;
-    gap: 1rem;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin: 1rem 0;
+    justify-content: center;
 }
 
-.demo-box {
-    padding: 1rem;
-    background: var(--theme-color);
-    color: white;
-    border-radius: var(--border-radius);
-    transition: var(--transition);
+.diversity-item {
+    text-align: center;
+    min-width: 120px;
+}
+
+.diversity-chart {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--diversity-color-1) 0% var(--segment-1, 0%),
+        var(--diversity-color-2) var(--segment-1, 0%) var(--segment-2, 0%),
+        var(--diversity-color-3) var(--segment-2, 0%) var(--segment-3, 0%),
+        var(--diversity-color-4) var(--segment-3, 0%) 100%
+    );
+    margin: 0 auto 0.5rem;
+    position: relative;
+    animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.diversity-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .grid-container {
-        grid-template-areas:
-            "header"
-            "sidebar"
-            "main"
-            "footer";
-        height: auto;
+    .heatmap-grid {
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(9, 1fr);
+    }
+
+    .activity-flex {
+        gap: 0.5rem;
+    }
+
+    .activity-label {
+        min-width: 100px;
+        font-size: 0.9rem;
     }
 
     header {
@@ -173,8 +266,9 @@ section {
         gap: 1rem;
     }
 
-    .flex-container {
-        flex-direction: column;
+    nav {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -189,22 +283,10 @@ section {
 
 /* Focus styles for keyboard navigation */
 button:focus,
-input:focus {
+.heatmap-cell:focus,
+.discussion-item:focus {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
-}
-
-details summary {
-    cursor: pointer;
-    padding: 0.5rem;
-    background: var(--secondary-color);
-    border-radius: var(--border-radius);
-    margin-bottom: 0.5rem;
-}
-
-details summary:hover {
-    background: var(--primary-color);
-    color: white;
 }
 
 footer {
