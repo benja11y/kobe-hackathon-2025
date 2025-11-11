@@ -101,6 +101,13 @@ async function loadCommunityData() {
             issues: g.issues.length
         }));
 
+        // Normalize PRs to 0-100% scale, with 100% = 1.2x max value
+        const maxPrs = Math.max(...activityData.map(g => g.prs));
+        const scaleMax = maxPrs * 1.2;
+        activityData.forEach(g => {
+            g.percentage = Math.min(100, Math.round((g.prs / scaleMax) * 100));
+        });
+
         // Process discussions: recent issues from all groups
         const allIssues = groupsData.flatMap(g => g.issues.map(issue => ({
             ...issue,
@@ -200,7 +207,7 @@ function populateActivity(data) {
         bar.className = 'activity-bar';
         bar.innerHTML = `
             <div class="activity-label">${group.group}</div>
-            <div class="activity-fill" style="--percentage: ${(group.prs / 50) * 100}%"></div>
+            <div class="activity-fill" style="--percentage: ${group.percentage}%"></div>
             <div class="activity-value">${group.prs} PRs</div>
         `;
         chart.appendChild(bar);
