@@ -27,26 +27,26 @@ const w3cGroups = [
     { name: 'Web Performance', repo: 'w3c/performance-timeline', mailing: 'public-web-perf' }
 ];
 
-// Helper to parse RSS feed
-function parseRSS(rssText, groupName) {
+// Helper to parse Atom feed
+function parseRSS(atomText, groupName) {
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(rssText, 'text/xml');
-    const items = xmlDoc.querySelectorAll('item');
+    const xmlDoc = parser.parseFromString(atomText, 'text/xml');
+    const entries = xmlDoc.querySelectorAll('entry');
     const parsedItems = [];
 
-    items.forEach((item, index) => {
+    entries.forEach((entry, index) => {
         if (index >= 5) return; // Limit to 5 per group
-        const title = item.querySelector('title')?.textContent || 'No title';
-        const link = item.querySelector('link')?.textContent || '';
-        const pubDate = item.querySelector('pubDate')?.textContent || '';
-        const author = item.querySelector('author')?.textContent || item.querySelector('dc\\:creator')?.textContent || 'Unknown';
+        const title = entry.querySelector('title')?.textContent || 'No title';
+        const link = entry.querySelector('link')?.getAttribute('href') || '';
+        const published = entry.querySelector('published')?.textContent || entry.querySelector('updated')?.textContent || '';
+        const author = entry.querySelector('author name')?.textContent || 'Unknown';
 
         parsedItems.push({
             title: `${title} (${groupName})`,
             author,
             link,
-            date: new Date(pubDate).toLocaleString(),
-            new: Date.now() - new Date(pubDate) < 24 * 60 * 60 * 1000
+            date: new Date(published).toLocaleString(),
+            new: Date.now() - new Date(published) < 24 * 60 * 60 * 1000
         });
     });
 
@@ -92,7 +92,7 @@ async function loadCommunityData() {
             const [contributorsRes, issuesRes, mailingRes] = await Promise.all([
                 fetch(`https://api.github.com/repos/${group.repo}/contributors?per_page=10`, { headers }),
                 fetch(`https://api.github.com/repos/${group.repo}/issues?state=open&per_page=5`, { headers }),
-                fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/index.rss`)
+                fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/feed.atom`)
             ]);
 
             if (!contributorsRes.ok || !issuesRes.ok) {
