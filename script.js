@@ -87,12 +87,10 @@ async function loadCommunityData() {
     if (cachedData) {
         console.log('Loading cached W3C data');
         const data = JSON.parse(cachedData);
-        populateHeatmap(data.heatmap);
         populateActivity(data.activity);
         populateDiscussions(data.discussions);
         populateDiversity(data.diversity);
         populateMailing(data.mailing || []);
-        document.getElementById('heatmap-time').textContent = data.timestamp;
         return;
     }
 
@@ -168,20 +166,7 @@ async function loadCommunityData() {
 
         const groupsData = await Promise.all(fetchPromises);
 
-        // Process heatmap: aggregate top contributors, simulate weekly activity
-        const allContributors = groupsData.flatMap(g => g.contributors);
-        const uniqueContributors = Array.from(
-            allContributors.reduce((map, c) => {
-                if (!map.has(c.login)) map.set(c.login, { ...c, total: c.contributions });
-                else map.get(c.login).total += c.contributions;
-                return map;
-            }, new Map()).values()
-        ).sort((a, b) => b.total - a.total).slice(0, 49);
 
-        const heatmapData = uniqueContributors.map((contrib, index) => ({
-            day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
-            activity: contrib.total > 100 ? 'high' : contrib.total > 50 ? 'medium' : 'low'
-        }));
 
         // Process activity levels
         const activityData = groupsData.map(g => ({
@@ -252,34 +237,28 @@ async function loadCommunityData() {
         }
 
         const processedData = {
-            heatmap: heatmapData,
             activity: activityData,
             discussions: discussionsData,
             diversity: diversityData,
-            mailing: mailingData,
-            timestamp: new Date().toLocaleString()
+            mailing: mailingData
         };
 
         // Cache in sessionStorage
         sessionStorage.setItem(cacheKey, JSON.stringify(processedData));
 
         // Populate
-        populateHeatmap(heatmapData);
         populateActivity(activityData);
         populateDiscussions(discussionsData);
         populateDiversity(diversityData);
         populateMailing(mailingData);
-        document.getElementById('heatmap-time').textContent = processedData.timestamp;
 
     } catch (error) {
         console.log('Error fetching W3C data:', error);
         // Show error messages instead of placeholder data
-        showError('heatmap-section', 'Unable to load contributor heatmap data');
         showError('activity-section', 'Unable to load activity levels data');
         showError('discussions-section', 'Unable to load discussions data');
         showError('diversity-section', 'Unable to load diversity metrics data');
         showError('mailing-section', 'Unable to load mailing list activity data');
-        document.getElementById('heatmap-time').textContent = 'Error loading data';
     }
 }
 
@@ -292,19 +271,7 @@ function getRegionFromLocation(location) {
     return 'Other';
 }
 
-// Populate heatmap
-function populateHeatmap(data) {
-    const heatmap = document.getElementById('heatmap');
-    heatmap.innerHTML = '';
-    data.forEach(cell => {
-        const div = document.createElement('div');
-        div.className = 'heatmap-cell';
-        div.setAttribute('data-activity', cell.activity);
-        div.setAttribute('data-tooltip', `${cell.day}: ${cell.activity} activity`);
-        div.tabIndex = 0; // Keyboard accessible
-        heatmap.appendChild(div);
-    });
-}
+
 
 // Populate activity chart
 function populateActivity(data) {
