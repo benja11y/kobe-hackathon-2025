@@ -118,7 +118,8 @@ async function loadCommunityData() {
                 contributors,
                 issues,
                 mailing: mailingItems,
-                totalContributions: contributors.reduce((sum, c) => sum + c.contributions, 0)
+                totalContributions: contributors.reduce((sum, c) => sum + c.contributions, 0),
+                mailingCount: mailingItems.length
             };
         });
 
@@ -143,14 +144,17 @@ async function loadCommunityData() {
         const activityData = groupsData.map(g => ({
             group: g.group,
             prs: Math.round(g.totalContributions / 10), // Estimate PRs from contributions
-            issues: g.issues.length
+            mailing: g.mailingCount
         }));
 
-        // Normalize PRs to 0-100% scale, with 100% = 1.2x max value
+        // Normalize PRs and mailing to 0-100% scale, with 100% = 1.2x max value
         const maxPrs = Math.max(...activityData.map(g => g.prs));
-        const scaleMax = maxPrs * 1.2;
+        const maxMailing = Math.max(...activityData.map(g => g.mailing));
+        const scaleMaxPrs = maxPrs * 1.2;
+        const scaleMaxMailing = maxMailing * 1.2;
         activityData.forEach(g => {
-            g.percentage = Math.min(100, Math.round((g.prs / scaleMax) * 100));
+            g.percentagePrs = Math.min(100, Math.round((g.prs / scaleMaxPrs) * 100));
+            g.percentageMailing = Math.min(100, Math.round((g.mailing / scaleMaxMailing) * 100));
         });
 
         // Process discussions: recent issues from all groups
@@ -268,8 +272,10 @@ function populateActivity(data) {
         bar.className = 'activity-bar';
         bar.innerHTML = `
             <div class="activity-label">${group.group}</div>
-            <div class="activity-fill" style="--percentage: ${group.percentage}%"></div>
+            <div class="activity-fill pr-fill" style="--percentage: ${group.percentagePrs}%"></div>
             <div class="activity-value">${group.prs} PRs</div>
+            <div class="activity-fill mailing-fill" style="--percentage: ${group.percentageMailing}%"></div>
+            <div class="activity-value">${group.mailing} mailing list items</div>
         `;
         chart.appendChild(bar);
     });

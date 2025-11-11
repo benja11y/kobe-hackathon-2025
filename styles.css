@@ -159,15 +159,28 @@ section {
     border-radius: var(--border-radius);
     position: relative;
     overflow: hidden;
+    margin-bottom: 0.5rem;
 }
 
-.activity-fill::after {
+.pr-fill::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
     background: var(--primary-color);
+    border-radius: var(--border-radius);
+    width: var(--percentage, 0%);
+    transition: width 1s ease;
+}
+
+.mailing-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: #ff9800; /* Orange for mailing */
     border-radius: var(--border-radius);
     width: var(--percentage, 0%);
     transition: width 1s ease;
