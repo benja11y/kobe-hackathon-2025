@@ -27,6 +27,15 @@ const w3cGroups = [
     { name: 'Privacy', repo: 'w3c/privacycg' }
 ];
 
+// Helper to show error messages
+function showError(sectionId, message) {
+    const section = document.getElementById(sectionId);
+    const existingContent = section.querySelector('div');
+    if (existingContent) {
+        existingContent.innerHTML = `<p style="color: red; text-align: center;">${message}</p>`;
+    }
+}
+
 // Load community data
 async function loadCommunityData() {
     const cacheKey = 'w3cCommunityData';
@@ -149,37 +158,13 @@ async function loadCommunityData() {
         document.getElementById('heatmap-time').textContent = processedData.timestamp;
 
     } catch (error) {
-        console.log('Error fetching W3C data, using fallback:', error);
-        // Fallback static data
-        const fallbackData = {
-            heatmap: Array.from({ length: 49 }, (_, i) => ({
-                day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i % 7],
-                activity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)]
-            })),
-            activity: w3cGroups.map(g => ({
-                group: g.name,
-                prs: Math.floor(Math.random() * 50) + 10,
-                issues: Math.floor(Math.random() * 100) + 20
-            })),
-            discussions: [
-                { title: 'Sample Discussion 1', author: 'user1', time: '1 hour ago', new: true },
-                { title: 'Sample Discussion 2', author: 'user2', time: '2 hours ago', new: false }
-            ],
-            diversity: [
-                { region: 'North America', percentage: 35 },
-                { region: 'Europe', percentage: 30 },
-                { region: 'Asia', percentage: 25 },
-                { region: 'Other', percentage: 10 }
-            ],
-            timestamp: new Date().toLocaleString()
-        };
-
-        sessionStorage.setItem(cacheKey, JSON.stringify(fallbackData));
-        populateHeatmap(fallbackData.heatmap);
-        populateActivity(fallbackData.activity);
-        populateDiscussions(fallbackData.discussions);
-        populateDiversity(fallbackData.diversity);
-        document.getElementById('heatmap-time').textContent = fallbackData.timestamp;
+        console.log('Error fetching W3C data:', error);
+        // Show error messages instead of placeholder data
+        showError('heatmap-section', 'Unable to load contributor heatmap data');
+        showError('activity-section', 'Unable to load activity levels data');
+        showError('discussions-section', 'Unable to load discussions data');
+        showError('diversity-section', 'Unable to load diversity metrics data');
+        document.getElementById('heatmap-time').textContent = 'Error loading data';
     }
 }
 
