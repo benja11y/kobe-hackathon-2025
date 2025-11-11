@@ -64,7 +64,7 @@ function showError(sectionId, message) {
 
 // Load community data
 async function loadCommunityData() {
-    const cacheKey = 'w3cCommunityDataV2'; // Updated to invalidate old cache
+    const cacheKey = 'w3cCommunityDataV3'; // Updated for dual activity bars
     const cachedData = sessionStorage.getItem(cacheKey);
 
     if (cachedData) {
