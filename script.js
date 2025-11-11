@@ -15,17 +15,43 @@ refreshBtn.addEventListener('click', () => {
     loadCommunityData();
 });
 
-// W3C Working Groups and their GitHub repos (verified existing repos)
+// W3C Working Groups and their GitHub repos and mailing lists (verified existing)
 const w3cGroups = [
-    { name: 'CSS WG', repo: 'w3c/csswg-drafts' },
-    { name: 'HTML WG', repo: 'w3c/html' },
-    { name: 'Accessibility', repo: 'w3c/aria' },
-    { name: 'Web Apps', repo: 'w3c/webappsec' },
-    { name: 'Web Components', repo: 'w3c/webcomponents' },
-    { name: 'Service Workers', repo: 'w3c/ServiceWorker' },
-    { name: 'WebRTC', repo: 'w3c/webrtc-pc' },
-    { name: 'Web Performance', repo: 'w3c/performance-timeline' }
+    { name: 'CSS WG', repo: 'w3c/csswg-drafts', mailing: 'www-style' },
+    { name: 'HTML WG', repo: 'w3c/html', mailing: 'public-html' },
+    { name: 'Accessibility', repo: 'w3c/aria', mailing: 'wai-xtech' },
+    { name: 'Web Apps', repo: 'w3c/webappsec', mailing: 'public-webappsec' },
+    { name: 'Web Components', repo: 'w3c/webcomponents', mailing: 'public-webapps' },
+    { name: 'Service Workers', repo: 'w3c/ServiceWorker', mailing: 'public-webapps' },
+    { name: 'WebRTC', repo: 'w3c/webrtc-pc', mailing: 'public-webrtc' },
+    { name: 'Web Performance', repo: 'w3c/performance-timeline', mailing: 'public-web-perf' }
 ];
+
+// Helper to parse RSS feed
+function parseRSS(rssText, groupName) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(rssText, 'text/xml');
+    const items = xmlDoc.querySelectorAll('item');
+    const parsedItems = [];
+
+    items.forEach((item, index) => {
+        if (index >= 5) return; // Limit to 5 per group
+        const title = item.querySelector('title')?.textContent || 'No title';
+        const link = item.querySelector('link')?.textContent || '';
+        const pubDate = item.querySelector('pubDate')?.textContent || '';
+        const author = item.querySelector('author')?.textContent || item.querySelector('dc\\:creator')?.textContent || 'Unknown';
+
+        parsedItems.push({
+            title: `${title} (${groupName})`,
+            author,
+            link,
+            date: new Date(pubDate).toLocaleString(),
+            new: Date.now() - new Date(pubDate) < 24 * 60 * 60 * 1000
+        });
+    });
+
+    return parsedItems;
+}
 
 // Helper to show error messages
 function showError(sectionId, message) {
@@ -48,6 +74,7 @@ async function loadCommunityData() {
         populateActivity(data.activity);
         populateDiscussions(data.discussions);
         populateDiversity(data.diversity);
+        populateMailing(data.mailing || []);
         document.getElementById('heatmap-time').textContent = data.timestamp;
         return;
     }
@@ -62,9 +89,10 @@ async function loadCommunityData() {
 
         // Fetch data for all groups in parallel
         const fetchPromises = w3cGroups.map(async (group) => {
-            const [contributorsRes, issuesRes] = await Promise.all([
+            const [contributorsRes, issuesRes, mailingRes] = await Promise.all([
                 fetch(`https://api.github.com/repos/${group.repo}/contributors?per_page=10`, { headers }),
-                fetch(`https://api.github.com/repos/${group.repo}/issues?state=open&per_page=5`, { headers })
+                fetch(`https://api.github.com/repos/${group.repo}/issues?state=open&per_page=5`, { headers }),
+                fetch(`https://lists.w3.org/Archives/Public/${group.mailing}/index.rss`)
             ]);
 
             if (!contributorsRes.ok || !issuesRes.ok) {
@@ -73,11 +101,17 @@ async function loadCommunityData() {
 
             const contributors = await contributorsRes.json();
             const issues = await issuesRes.json();
+            let mailingItems = [];
+            if (mailingRes.ok) {
+                const rssText = await mailingRes.text();
+                mailingItems = parseRSS(rssText, group.name);
+            }
 
             return {
                 group: group.name,
                 contributors,
                 issues,
+                mailing: mailingItems,
                 totalContributions: contributors.reduce((sum, c) => sum + c.contributions, 0)
             };
         });
@@ -126,6 +160,11 @@ async function loadCommunityData() {
             new: Date.now() - new Date(issue.created_at) < 24 * 60 * 60 * 1000 // New if < 24h
         }));
 
+        // Process mailing list activity: recent posts from all groups
+        const allMailing = groupsData.flatMap(g => g.mailing).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+
+        const mailingData = allMailing;
+
         // Process diversity: count contributor locations
         const locations = {};
         allContributors.forEach(c => {
@@ -156,6 +195,7 @@ async function loadCommunityData() {
             activity: activityData,
             discussions: discussionsData,
             diversity: diversityData,
+            mailing: mailingData,
             timestamp: new Date().toLocaleString()
         };
 
@@ -167,6 +207,7 @@ async function loadCommunityData() {
         populateActivity(activityData);
         populateDiscussions(discussionsData);
         populateDiversity(diversityData);
+        populateMailing(mailingData);
         document.getElementById('heatmap-time').textContent = processedData.timestamp;
 
     } catch (error) {
@@ -176,6 +217,7 @@ async function loadCommunityData() {
         showError('activity-section', 'Unable to load activity levels data');
         showError('discussions-section', 'Unable to load discussions data');
         showError('diversity-section', 'Unable to load diversity metrics data');
+        showError('mailing-section', 'Unable to load mailing list activity data');
         document.getElementById('heatmap-time').textContent = 'Error loading data';
     }
 }
@@ -248,6 +290,26 @@ function populateDiversity(data) {
             <div>${item.percentage}%</div>
         `;
         metrics.appendChild(div);
+    });
+}
+
+// Populate mailing list activity
+function populateMailing(data) {
+    const feed = document.getElementById('mailing-activity');
+    feed.innerHTML = '';
+    if (data.length === 0) {
+        feed.innerHTML = '<p>No recent mailing list activity found.</p>';
+        return;
+    }
+    data.forEach(item => {
+        const article = document.createElement('article');
+        article.className = `mailing-item ${item.new ? 'new' : ''}`;
+        article.setAttribute('aria-label', `Mailing list post: ${item.title} by ${item.author}`);
+        article.innerHTML = `
+            <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+            <p>By ${item.author} • ${item.date}</p>
+        `;
+        feed.appendChild(article);
     });
 }
 
